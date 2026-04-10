@@ -2,8 +2,11 @@ package com.imaire.violetmod.common.block;
 
 import com.imaire.violetmod.common.blockentity.LogicalComputerBlockEntity;
 import com.imaire.violetmod.registry.ModBlockEntities;
+import com.imaire.violetmod.registry.ModDataComponents;
 import com.mojang.serialization.MapCodec;
 import net.minecraft.core.BlockPos;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.BaseEntityBlock;
 import net.minecraft.world.level.block.EntityBlock;
@@ -21,6 +24,22 @@ public class LogicalComputerBlock extends BaseEntityBlock {
 
     public LogicalComputerBlock(Properties properties) {
         super(properties);
+    }
+
+    @Override
+    public void setPlacedBy(
+            Level level,
+            BlockPos pos,
+            BlockState state,
+            @org.jetbrains.annotations.Nullable LivingEntity placer,
+            ItemStack stack
+    ) {
+        super.setPlacedBy(level, pos, state, placer, stack);
+
+        if (!level.isClientSide && level.getBlockEntity(pos) instanceof LogicalComputerBlockEntity be) {
+            int stored = stack.getOrDefault(ModDataComponents.ENERGY_STORED.get(), 0);
+            be.setStoredEnergy(stored);
+        }
     }
 
     @Override

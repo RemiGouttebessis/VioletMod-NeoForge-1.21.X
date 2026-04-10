@@ -1,6 +1,7 @@
 package com.imaire.violetmod.registry;
 
 import com.imaire.violetmod.VioletMod;
+import com.imaire.violetmod.common.item.LogicalComputerBlockItem;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
@@ -13,5 +14,5 @@ public class ModItems {
             DeferredRegister.create(Registries.ITEM, VioletMod.MOD_ID);
 
     public static final Supplier<Item> LOGICAL_COMPUTER_ITEM = ITEMS.register("logical_computer",
-            () -> new BlockItem(ModBlocks.LOGICAL_COMPUTER.get(), new Item.Properties()));
+            () -> new LogicalComputerBlockItem(ModBlocks.LOGICAL_COMPUTER.get(), new Item.Properties()));
 }

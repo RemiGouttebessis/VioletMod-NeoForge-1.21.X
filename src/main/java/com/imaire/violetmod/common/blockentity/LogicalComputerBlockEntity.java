@@ -1,7 +1,9 @@
 package com.imaire.violetmod.common.blockentity;
 
+import com.imaire.violetmod.common.energy.ModEnergyStorage;
 import com.imaire.violetmod.config.MachineConfig;
 import com.imaire.violetmod.registry.ModBlockEntities;
+import com.imaire.violetmod.registry.ModDataComponents;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.HolderLookup;
@@ -16,29 +18,24 @@ public class LogicalComputerBlockEntity extends BlockEntity {
     private int progress = 0;
     private boolean active = false;
 
-    private final EnergyStorage energyStorage = new EnergyStorage(
+    private final ModEnergyStorage energyStorage = new ModEnergyStorage(
             MachineConfig.LOGICAL_COMPUTER.capacity(),
             MachineConfig.LOGICAL_COMPUTER.maxReceive(),
-            0
-    ) {
-        @Override
-        public int receiveEnergy(int maxReceive, boolean simulate) {
-            int received = super.receiveEnergy(maxReceive, simulate);
-            if (!simulate && received > 0) {
-                setChanged();
-            }
-            return received;
-        }
+            0,
+            this::setChanged
+    );
 
-        @Override
-        public int extractEnergy(int maxExtract, boolean simulate) {
-            int extracted = super.extractEnergy(maxExtract, simulate);
-            if (!simulate && extracted > 0) {
-                setChanged();
-            }
-            return extracted;
-        }
-    };
+    public void setStoredEnergy(int energy) {
+        int clamped = Math.max(0, Math.min(energy, energyStorage.getMaxEnergyStored()));
+        energyStorage.setEnergyDirect(clamped);
+        setChanged();
+    }
+
+    @Override
+    protected void collectImplicitComponents(net.minecraft.core.component.DataComponentMap.Builder builder) {
+        super.collectImplicitComponents(builder);
+        builder.set(ModDataComponents.ENERGY_STORED.get(), this.energyStorage.getEnergyStored());
+    }
 
     public LogicalComputerBlockEntity(BlockPos pos, BlockState state) {
         super(ModBlockEntities.LOGICAL_COMPUTER_BE.get(), pos, state);
@@ -48,36 +45,17 @@ public class LogicalComputerBlockEntity extends BlockEntity {
         return energyStorage;
     }
 
-    public int getProgress() {
-        return progress;
-    }
-
-    public boolean isActive() {
-        return active;
-    }
-
-    public int getEnergyStored() {
-        return energyStorage.getEnergyStored();
-    }
-
-    public int getMaxEnergyStored() {
-        return energyStorage.getMaxEnergyStored();
-    }
-
     public static void serverTick(Level level, BlockPos pos, BlockState state, LogicalComputerBlockEntity be) {
         final int energyPerTick = MachineConfig.LOGICAL_COMPUTER.energyPerTick();
         final int maxProgress = MachineConfig.LOGICAL_COMPUTER.maxProgress();
 
-        boolean wasActive = be.active;
-
         if (be.energyStorage.getEnergyStored() >= energyPerTick) {
-            be.energyStorage.extractEnergy(energyPerTick, false);
+            be.energyStorage.consumeInternal(energyPerTick, false);
             be.progress++;
             be.active = true;
 
             if (be.progress >= maxProgress) {
                 be.progress = 0;
-                // future action
             }
 
             be.setChanged();
@@ -86,9 +64,6 @@ public class LogicalComputerBlockEntity extends BlockEntity {
             be.setChanged();
         }
 
-        if (wasActive != be.active) {
-            level.sendBlockUpdated(pos, state, state, 3);
-        }
     }
 
     @Override

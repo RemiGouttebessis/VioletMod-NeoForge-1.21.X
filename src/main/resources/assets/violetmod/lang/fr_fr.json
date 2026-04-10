@@ -3,6 +3,8 @@
 
   "itemGroup.violetmod": "Violet Mod",
 
+  "tooltip.violetmod.energy": "Énergie",
+
   "config.violetmod.logical_computer.capacity": "Capacité de l'ordinateur logique",
   "config.violetmod.logical_computer.max_receive": "Réception max de l'ordinateur logique",
   "config.violetmod.logical_computer.energy_per_tick": "Énergie consommée par tick",

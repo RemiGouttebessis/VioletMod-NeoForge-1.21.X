@@ -2,10 +2,7 @@ package com.imaire.violetmod;
 
 import com.imaire.violetmod.common.blockentity.LogicalComputerBlockEntity;
 import com.imaire.violetmod.config.ModConfigs;
-import com.imaire.violetmod.registry.ModBlockEntities;
-import com.imaire.violetmod.registry.ModBlocks;
-import com.imaire.violetmod.registry.ModCreativeTabs;
-import com.imaire.violetmod.registry.ModItems;
+import com.imaire.violetmod.registry.*;
 import com.mojang.logging.LogUtils;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.ModContainer;
@@ -21,10 +18,12 @@ public class VioletMod {
     public static final Logger LOGGER = LogUtils.getLogger();
 
     public VioletMod(IEventBus modEventBus, ModContainer modContainer) {
+
         ModBlocks.BLOCKS.register(modEventBus);
         ModItems.ITEMS.register(modEventBus);
         ModBlockEntities.BLOCK_ENTITIES.register(modEventBus);
         ModCreativeTabs.CREATIVE_MODE_TABS.register(modEventBus);
+        ModDataComponents.DATA_COMPONENTS.register(modEventBus);
 
         modEventBus.addListener(this::registerCapabilities);
 

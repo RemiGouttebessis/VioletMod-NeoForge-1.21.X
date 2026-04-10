@@ -9,6 +9,15 @@
           "name": "violetmod:logical_computer"
         }
       ],
+      "functions": [
+        {
+          "function": "minecraft:copy_components",
+          "source": "block_entity",
+          "include": [
+            "violetmod:energy_stored"
+          ]
+        }
+      ],
       "conditions": [
         {
           "condition": "minecraft:survives_explosion"
