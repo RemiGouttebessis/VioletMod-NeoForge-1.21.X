@@ -1,5 +1,6 @@
 package com.imaire.violetmod.common.blockentity;
 
+import com.imaire.violetmod.config.MachineConfig;
 import com.imaire.violetmod.registry.ModBlockEntities;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -12,15 +13,14 @@ import net.neoforged.neoforge.energy.EnergyStorage;
 import org.jetbrains.annotations.Nullable;
 
 public class LogicalComputerBlockEntity extends BlockEntity {
-    private static final int CAPACITY = 100_000;
-    private static final int MAX_RECEIVE = 200;
-    private static final int MAX_EXTRACT = 0;
-    private static final int ENERGY_PER_TICK = 2000;
-    private static final int MAX_PROGRESS = 100;
-
     private int progress = 0;
+    private boolean active = false;
 
-    private final EnergyStorage energyStorage = new EnergyStorage(CAPACITY, MAX_RECEIVE, MAX_EXTRACT) {
+    private final EnergyStorage energyStorage = new EnergyStorage(
+            MachineConfig.LOGICAL_COMPUTER.capacity(),
+            MachineConfig.LOGICAL_COMPUTER.maxReceive(),
+            0
+    ) {
         @Override
         public int receiveEnergy(int maxReceive, boolean simulate) {
             int received = super.receiveEnergy(maxReceive, simulate);
@@ -52,20 +52,42 @@ public class LogicalComputerBlockEntity extends BlockEntity {
         return progress;
     }
 
-    public static void serverTick(Level level, BlockPos pos, BlockState state, LogicalComputerBlockEntity be) {
-        if (be.energyStorage.getEnergyStored() >= ENERGY_PER_TICK) {
-            be.energyStorage.extractEnergy(ENERGY_PER_TICK, false);
-            be.progress++;
+    public boolean isActive() {
+        return active;
+    }
 
-            if (be.progress >= MAX_PROGRESS) {
+    public int getEnergyStored() {
+        return energyStorage.getEnergyStored();
+    }
+
+    public int getMaxEnergyStored() {
+        return energyStorage.getMaxEnergyStored();
+    }
+
+    public static void serverTick(Level level, BlockPos pos, BlockState state, LogicalComputerBlockEntity be) {
+        final int energyPerTick = MachineConfig.LOGICAL_COMPUTER.energyPerTick();
+        final int maxProgress = MachineConfig.LOGICAL_COMPUTER.maxProgress();
+
+        boolean wasActive = be.active;
+
+        if (be.energyStorage.getEnergyStored() >= energyPerTick) {
+            be.energyStorage.extractEnergy(energyPerTick, false);
+            be.progress++;
+            be.active = true;
+
+            if (be.progress >= maxProgress) {
                 be.progress = 0;
-                // ici tu pourras lancer une recette, produire un résultat, etc.
+                // future action
             }
 
             be.setChanged();
-        } else if (be.progress != 0) {
-            be.progress = 0;
+        } else {
+            be.active = false;
             be.setChanged();
+        }
+
+        if (wasActive != be.active) {
+            level.sendBlockUpdated(pos, state, state, 3);
         }
     }
 
@@ -74,14 +96,18 @@ public class LogicalComputerBlockEntity extends BlockEntity {
         super.saveAdditional(tag, registries);
         tag.put("energy", energyStorage.serializeNBT(registries));
         tag.putInt("progress", progress);
+        tag.putBoolean("active", active);
     }
 
     @Override
     protected void loadAdditional(CompoundTag tag, HolderLookup.Provider registries) {
         super.loadAdditional(tag, registries);
+
         if (tag.contains("energy")) {
             energyStorage.deserializeNBT(registries, tag.get("energy"));
         }
+
         progress = tag.getInt("progress");
+        active = tag.getBoolean("active");
     }
 }

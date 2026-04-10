@@ -1,3 +1,10 @@
 {
-  "block.violetmod.logical_computer": "Ordinateur logique"
+  "block.violetmod.logical_computer": "Ordinateur logique",
+
+  "itemGroup.violetmod": "Violet Mod",
+
+  "config.violetmod.logical_computer.capacity": "Capacité de l'ordinateur logique",
+  "config.violetmod.logical_computer.max_receive": "Réception max de l'ordinateur logique",
+  "config.violetmod.logical_computer.energy_per_tick": "Énergie consommée par tick",
+  "config.violetmod.logical_computer.max_progress": "Progression max de l'ordinateur logique"
 }
