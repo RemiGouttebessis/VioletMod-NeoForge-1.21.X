@@ -1,7 +1,8 @@
 {
   "variants": {
-    "": {
-      "model": "violetmod:block/violet_extractor"
-    }
+    "facing=north": { "model": "violetmod:block/violet_extractor" },
+    "facing=east":  { "model": "violetmod:block/violet_extractor", "y": 90 },
+    "facing=south": { "model": "violetmod:block/violet_extractor", "y": 180 },
+    "facing=west":  { "model": "violetmod:block/violet_extractor", "y": 270 }
   }
 }

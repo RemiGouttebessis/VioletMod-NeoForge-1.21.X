@@ -5,15 +5,19 @@ import com.imaire.violetmod.registry.ModBlockEntities;
 import com.imaire.violetmod.registry.ModDataComponents;
 import com.mojang.serialization.MapCodec;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.BaseEntityBlock;
+import net.minecraft.world.level.block.HorizontalDirectionalBlock;
 import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityTicker;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.StateDefinition;
 import org.jetbrains.annotations.Nullable;
 
 public class VioletExtractorBlock extends BaseEntityBlock {
@@ -21,27 +25,22 @@ public class VioletExtractorBlock extends BaseEntityBlock {
 
     public VioletExtractorBlock(Properties properties) {
         super(properties);
-    }
-
-    @Override
-    public void setPlacedBy(
-            Level level,
-            BlockPos pos,
-            BlockState state,
-            @Nullable LivingEntity placer,
-            ItemStack stack
-    ) {
-        super.setPlacedBy(level, pos, state, placer, stack);
-
-        if (!level.isClientSide && level.getBlockEntity(pos) instanceof VioletExtractorBlockEntity be) {
-            int stored = stack.getOrDefault(ModDataComponents.ENERGY_STORED.get(), 0);
-            be.setStoredEnergy(stored);
-        }
+        this.registerDefaultState(this.stateDefinition.any().setValue(HorizontalDirectionalBlock.FACING, Direction.NORTH));
     }
 
     @Override
     protected MapCodec<? extends BaseEntityBlock> codec() {
         return CODEC;
+    }
+
+    @Override
+    protected void createBlockStateDefinition(StateDefinition.Builder<net.minecraft.world.level.block.Block, BlockState> builder) {
+        builder.add(HorizontalDirectionalBlock.FACING);
+    }
+
+    @Override
+    public @Nullable BlockState getStateForPlacement(BlockPlaceContext context) {
+        return this.defaultBlockState().setValue(HorizontalDirectionalBlock.FACING, context.getHorizontalDirection().getOpposite());
     }
 
     @Override
@@ -63,5 +62,21 @@ public class VioletExtractorBlock extends BaseEntityBlock {
                 ModBlockEntities.VIOLET_EXTRACTOR_BE.get(),
                 VioletExtractorBlockEntity::serverTick
         );
+    }
+
+    @Override
+    public void setPlacedBy(
+            Level level,
+            BlockPos pos,
+            BlockState state,
+            @Nullable LivingEntity placer,
+            ItemStack stack
+    ) {
+        super.setPlacedBy(level, pos, state, placer, stack);
+
+        if (!level.isClientSide && level.getBlockEntity(pos) instanceof VioletExtractorBlockEntity be) {
+            int stored = stack.getOrDefault(ModDataComponents.ENERGY_STORED.get(), 0);
+            be.setStoredEnergy(stored);
+        }
     }
 }
