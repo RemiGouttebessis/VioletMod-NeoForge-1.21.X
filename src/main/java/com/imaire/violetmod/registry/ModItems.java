@@ -15,4 +15,8 @@ public class ModItems {
 
     public static final Supplier<Item> LOGICAL_COMPUTER_ITEM = ITEMS.register("logical_computer",
             () -> new LogicalComputerBlockItem(ModBlocks.LOGICAL_COMPUTER.get(), new Item.Properties()));
+
+    public static final Supplier<Item> VIOLET_EXTRACTOR_ITEM = ITEMS.register("violet_extractor",
+            () -> new LogicalComputerBlockItem(ModBlocks.VIOLET_EXTRACTOR.get(), new Item.Properties()));
+
 }

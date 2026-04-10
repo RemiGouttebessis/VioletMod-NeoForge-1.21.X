@@ -19,6 +19,7 @@ public class ModCreativeTabs {
                     .icon(() -> new ItemStack(ModItems.LOGICAL_COMPUTER_ITEM.get()))
                     .displayItems((parameters, output) -> {
                         output.accept(ModItems.LOGICAL_COMPUTER_ITEM.get());
+                        output.accept(ModItems.VIOLET_EXTRACTOR_ITEM.get());
                     })
                     .build());
 }

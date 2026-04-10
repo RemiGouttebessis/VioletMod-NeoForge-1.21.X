@@ -8,5 +8,9 @@
   "config.violetmod.logical_computer.capacity": "Capacité de l'ordinateur logique",
   "config.violetmod.logical_computer.max_receive": "Réception max de l'ordinateur logique",
   "config.violetmod.logical_computer.energy_per_tick": "Énergie consommée par tick",
-  "config.violetmod.logical_computer.max_progress": "Progression max de l'ordinateur logique"
+  "config.violetmod.logical_computer.max_progress": "Progression max de l'ordinateur logique",
+  "config.violetmod.violet_extractor.capacity": "Capacité de l'extracteur violet",
+  "config.violetmod.violet_extractor.max_receive": "Réception max de l'extracteur violet",
+  "config.violetmod.violet_extractor.energy_per_tick": "Énergie consommée par tick de l'extracteur violet",
+  "config.violetmod.violet_extractor.max_progress": "Progression max de l'extracteur violet"
 }

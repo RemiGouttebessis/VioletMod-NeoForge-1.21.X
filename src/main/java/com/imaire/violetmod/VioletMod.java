@@ -1,6 +1,7 @@
 package com.imaire.violetmod;
 
 import com.imaire.violetmod.common.blockentity.LogicalComputerBlockEntity;
+import com.imaire.violetmod.common.blockentity.VioletExtractorBlockEntity;
 import com.imaire.violetmod.config.ModConfigs;
 import com.imaire.violetmod.registry.*;
 import com.mojang.logging.LogUtils;
@@ -36,5 +37,12 @@ public class VioletMod {
                 ModBlockEntities.LOGICAL_COMPUTER_BE.get(),
                 (LogicalComputerBlockEntity be, net.minecraft.core.Direction side) -> be.getEnergyStorage(side)
         );
+
+        event.registerBlockEntity(
+                Capabilities.EnergyStorage.BLOCK,
+                ModBlockEntities.VIOLET_EXTRACTOR_BE.get(),
+                (VioletExtractorBlockEntity be, net.minecraft.core.Direction side) -> be.getEnergyStorage(side)
+        );
+
     }
 }
