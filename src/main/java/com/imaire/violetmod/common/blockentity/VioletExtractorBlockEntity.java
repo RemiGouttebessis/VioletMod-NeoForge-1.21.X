@@ -85,7 +85,7 @@ public class VioletExtractorBlockEntity extends BlockEntity {
         // Exemple temporaire : choisis ici le mode pour tes tests
         // Plus tard, ça viendra d'un slot, d'une recette, etc.
         be.obsidianMode = false;
-        be.cryingMode = true;
+        be.cryingMode = false;
 
         if (be.energyStorage.getEnergyStored() >= energyPerTick) {
             // Ici tu décides si la machine travaille vraiment
