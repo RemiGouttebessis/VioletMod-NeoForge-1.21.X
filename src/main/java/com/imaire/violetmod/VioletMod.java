@@ -38,7 +38,7 @@ public class VioletMod {
         event.enqueueWork(() -> {
             ItemBlockRenderTypes.setRenderLayer(
                     ModBlocks.VIOLET_EXTRACTOR.get(),
-                    RenderType.cutout()
+                    RenderType.translucent()
             );
         });
     }
