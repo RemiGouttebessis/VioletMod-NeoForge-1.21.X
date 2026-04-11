@@ -1,5 +1,7 @@
 .env
 .env.*
+.claude
+*.md
 
 ### Gradle ###
 .gradle

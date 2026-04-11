@@ -1,0 +1,7 @@
+{
+  "type": "violetmod:violet_extracting",
+  "ingredient": { "item": "minecraft:obsidian" },
+  "result": { "id": "minecraft:amethyst_shard", "count": 2 },
+  "energy_cost": 800,
+  "duration": 120
+}

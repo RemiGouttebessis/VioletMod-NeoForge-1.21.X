@@ -13,5 +13,7 @@
   "config.violetmod.violet_extractor.capacity": "Capacité de l'extracteur violet",
   "config.violetmod.violet_extractor.max_receive": "Réception max de l'extracteur violet",
   "config.violetmod.violet_extractor.energy_per_tick": "Énergie consommée par tick de l'extracteur violet",
-  "config.violetmod.violet_extractor.max_progress": "Progression max de l'extracteur violet"
+  "config.violetmod.violet_extractor.max_progress": "Progression max de l'extracteur violet",
+
+  "recipe.violetmod.violet_extracting": "Extraction violette"
 }

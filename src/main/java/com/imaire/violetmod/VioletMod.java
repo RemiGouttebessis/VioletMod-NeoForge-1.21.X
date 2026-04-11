@@ -1,12 +1,18 @@
 package com.imaire.violetmod;
 
-import com.imaire.violetmod.common.blockentity.LogicalComputerBlockEntity;
+import com.imaire.violetmod.common.blockentity.BaseMachineBlockEntity;
 import com.imaire.violetmod.common.blockentity.VioletExtractorBlockEntity;
 import com.imaire.violetmod.config.ModConfigs;
+import com.imaire.violetmod.datagen.ModBlockStateProvider;
+import com.imaire.violetmod.datagen.ModItemModelProvider;
+import com.imaire.violetmod.datagen.ModLanguageProvider;
+import com.imaire.violetmod.datagen.ModLootTableProvider;
 import com.imaire.violetmod.registry.*;
 import com.mojang.logging.LogUtils;
 import net.minecraft.client.renderer.ItemBlockRenderTypes;
 import net.minecraft.client.renderer.RenderType;
+import net.minecraft.data.DataGenerator;
+import net.minecraft.data.PackOutput;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.common.Mod;
@@ -14,6 +20,8 @@ import net.neoforged.fml.config.ModConfig;
 import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
 import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
+import net.neoforged.neoforge.data.event.GatherDataEvent;
+import net.neoforged.neoforge.items.wrapper.InvWrapper;
 import org.slf4j.Logger;
 
 @Mod(VioletMod.MOD_ID)
@@ -27,9 +35,12 @@ public class VioletMod {
         ModBlockEntities.BLOCK_ENTITIES.register(modEventBus);
         ModCreativeTabs.CREATIVE_MODE_TABS.register(modEventBus);
         ModDataComponents.DATA_COMPONENTS.register(modEventBus);
+        ModRecipes.RECIPE_SERIALIZERS.register(modEventBus);
+        ModRecipes.RECIPE_TYPES.register(modEventBus);
 
         modEventBus.addListener(this::registerCapabilities);
         modEventBus.addListener(this::onClientSetup);
+        modEventBus.addListener(this::gatherData);
 
         modContainer.registerConfig(ModConfig.Type.COMMON, ModConfigs.COMMON_SPEC);
     }
@@ -43,18 +54,35 @@ public class VioletMod {
         });
     }
 
+    private void gatherData(GatherDataEvent event) {
+        DataGenerator gen = event.getGenerator();
+        PackOutput packOutput = gen.getPackOutput();
+
+        gen.addProvider(event.includeClient(), new ModBlockStateProvider(packOutput, event.getExistingFileHelper()));
+        gen.addProvider(event.includeClient(), new ModItemModelProvider(packOutput, event.getExistingFileHelper()));
+        gen.addProvider(event.includeServer(), new ModLootTableProvider(packOutput, event.getLookupProvider()));
+        gen.addProvider(event.includeClient(), new ModLanguageProvider(packOutput, "en_us"));
+        gen.addProvider(event.includeClient(), new ModLanguageProvider(packOutput, "fr_fr"));
+    }
+
     private void registerCapabilities(RegisterCapabilitiesEvent event) {
+        // Energy — both machines share the same accessor from BaseMachineBlockEntity
         event.registerBlockEntity(
                 Capabilities.EnergyStorage.BLOCK,
                 ModBlockEntities.LOGICAL_COMPUTER_BE.get(),
-                (LogicalComputerBlockEntity be, net.minecraft.core.Direction side) -> be.getEnergyStorage(side)
+                BaseMachineBlockEntity::getEnergyStorage
         );
-
         event.registerBlockEntity(
                 Capabilities.EnergyStorage.BLOCK,
                 ModBlockEntities.VIOLET_EXTRACTOR_BE.get(),
-                (VioletExtractorBlockEntity be, net.minecraft.core.Direction side) -> be.getEnergyStorage(side)
+                BaseMachineBlockEntity::getEnergyStorage
         );
 
+        // Item handler — only VioletExtractor has an inventory
+        event.registerBlockEntity(
+                Capabilities.ItemHandler.BLOCK,
+                ModBlockEntities.VIOLET_EXTRACTOR_BE.get(),
+                (be, side) -> be.getInventory() != null ? new InvWrapper(be.getInventory()) : null
+        );
     }
 }

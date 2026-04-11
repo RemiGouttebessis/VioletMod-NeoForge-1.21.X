@@ -1,6 +1,6 @@
 {
   "block.violetmod.logical_computer": "Logical Computer",
-  "block.violetmod.violet_extractor": "Violet dust Extractor",
+  "block.violetmod.violet_extractor": "Violet Dust Extractor",
 
   "itemGroup.violetmod": "Violet Mod",
 
@@ -13,5 +13,7 @@
   "config.violetmod.violet_extractor.capacity": "Violet Extractor Capacity",
   "config.violetmod.violet_extractor.max_receive": "Violet Extractor Max Receive",
   "config.violetmod.violet_extractor.energy_per_tick": "Violet Extractor Energy Per Tick",
-  "config.violetmod.violet_extractor.max_progress": "Violet Extractor Max Progress"
+  "config.violetmod.violet_extractor.max_progress": "Violet Extractor Max Progress",
+
+  "recipe.violetmod.violet_extracting": "Violet Extracting"
 }

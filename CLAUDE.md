@@ -16,6 +16,12 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - **Minecraft 1.21.1**, **NeoForge 21.1.224**, **Parchment mappings 2024.11.17**
 - Mod ID: `violetmod`, Author: Imaire, License: MIT
 
+## Current Workflow Notes
+
+- Use `TODO.md` for roadmap and planned features
+- Use `TASKS.md` for the current implementation target
+- Prefer small, incremental changes that preserve existing machine and registry patterns
+
 ## Architecture Overview
 
 A NeoForge energy-based technology mod (v0.0.1, early development). Two machines currently implemented: `LogicalComputer` and `VioletExtractor`.
