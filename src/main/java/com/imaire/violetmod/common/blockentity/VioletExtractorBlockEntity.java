@@ -28,6 +28,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.neoforge.items.IItemHandler;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -76,7 +77,7 @@ public class VioletExtractorBlockEntity extends BaseMachineBlockEntity implement
                 MachineConfig.VIOLET_EXTRACTOR.capacity(),
                 MachineConfig.VIOLET_EXTRACTOR.maxReceive()
         );
-        initInventory(2); // slot 0 = input, slot 1 = output
+        initInventory(3); // slot 0 = input, slot 1 = output 1, slot 2 = output 2
         inputSideHandler  = buildInputHandler();
         outputSideHandler = buildOutputHandler();
     }
@@ -97,11 +98,12 @@ public class VioletExtractorBlockEntity extends BaseMachineBlockEntity implement
 
     // ── Sided capabilities ───────────────────────────────────────────────────
 
-    /** Energy: accepted only from EAST, WEST, SOUTH (and null for direct access). */
+    /** Energy: accepted from all four horizontal sides (and null for direct access). */
     @Override
     @Nullable
     public net.neoforged.neoforge.energy.EnergyStorage getEnergyStorage(@Nullable Direction side) {
         if (side == null
+                || side == Direction.NORTH
                 || side == Direction.EAST
                 || side == Direction.WEST
                 || side == Direction.SOUTH) {
@@ -135,7 +137,7 @@ public class VioletExtractorBlockEntity extends BaseMachineBlockEntity implement
             VioletExtractorRecipe recipe = recipeHolder.get().value();
             be.currentRecipeDuration = recipe.duration();
 
-            if (canInsertResult(be.inventory, recipe.result())) {
+            if (canInsertAllResults(be.inventory, recipe.results())) {
                 be.energyStorage.consumeInternal(energyPerTick, false);
                 be.progress++;
                 be.active = true;
@@ -143,7 +145,7 @@ public class VioletExtractorBlockEntity extends BaseMachineBlockEntity implement
                 if (be.progress >= recipe.duration()) {
                     be.progress = 0;
                     inputItem.shrink(1);
-                    insertResult(be.inventory, recipe.result().copy());
+                    insertAllResults(be.inventory, recipe.results());
                 }
             } else {
                 be.active = false;
@@ -185,17 +187,24 @@ public class VioletExtractorBlockEntity extends BaseMachineBlockEntity implement
         return VioletExtractorVisualState.IDLE;
     }
 
-    private static boolean canInsertResult(SimpleContainer inv, ItemStack result) {
-        ItemStack existing = inv.getItem(1);
-        if (existing.isEmpty()) return true;
-        if (!ItemStack.isSameItemSameComponents(existing, result)) return false;
-        return existing.getCount() + result.getCount() <= existing.getMaxStackSize();
+    private static boolean canInsertAllResults(SimpleContainer inv, List<ItemStack> results) {
+        for (int i = 0; i < results.size(); i++) {
+            ItemStack result   = results.get(i);
+            ItemStack existing = inv.getItem(i + 1);
+            if (existing.isEmpty()) continue;
+            if (!ItemStack.isSameItemSameComponents(existing, result)) return false;
+            if (existing.getCount() + result.getCount() > existing.getMaxStackSize()) return false;
+        }
+        return true;
     }
 
-    private static void insertResult(SimpleContainer inv, ItemStack result) {
-        ItemStack existing = inv.getItem(1);
-        if (existing.isEmpty()) inv.setItem(1, result);
-        else existing.grow(result.getCount());
+    private static void insertAllResults(SimpleContainer inv, List<ItemStack> results) {
+        for (int i = 0; i < results.size(); i++) {
+            ItemStack result   = results.get(i).copy();
+            ItemStack existing = inv.getItem(i + 1);
+            if (existing.isEmpty()) inv.setItem(i + 1, result);
+            else existing.grow(result.getCount());
+        }
     }
 
     /** TOP: insert-only wrapper on slot 0. */
@@ -231,29 +240,30 @@ public class VioletExtractorBlockEntity extends BaseMachineBlockEntity implement
         };
     }
 
-    /** BOTTOM: extract-only wrapper on slot 1 (exposed as slot 0 externally). */
+    /** BOTTOM: extract-only wrapper on slots 1 and 2 (exposed as slots 0 and 1 externally). */
     private IItemHandler buildOutputHandler() {
         return new IItemHandler() {
-            @Override public int getSlots() { return 1; }
+            @Override public int getSlots() { return 2; }
 
             @Override
             public ItemStack getStackInSlot(int slot) {
-                return slot == 0 ? Objects.requireNonNull(inventory).getItem(1) : ItemStack.EMPTY;
+                if (slot < 0 || slot > 1) return ItemStack.EMPTY;
+                return Objects.requireNonNull(inventory).getItem(slot + 1);
             }
 
             @Override public ItemStack insertItem(int slot, ItemStack stack, boolean simulate) { return stack; }
 
             @Override
             public ItemStack extractItem(int slot, int amount, boolean simulate) {
-                if (slot != 0) return ItemStack.EMPTY;
+                if (slot < 0 || slot > 1) return ItemStack.EMPTY;
                 SimpleContainer inv = Objects.requireNonNull(inventory);
-                ItemStack existing = inv.getItem(1);
+                ItemStack existing = inv.getItem(slot + 1);
                 if (existing.isEmpty()) return ItemStack.EMPTY;
                 int extracted = Math.min(amount, existing.getCount());
                 ItemStack result = existing.copyWithCount(extracted);
                 if (!simulate) {
                     existing.shrink(extracted);
-                    if (existing.isEmpty()) inv.setItem(1, ItemStack.EMPTY);
+                    if (existing.isEmpty()) inv.setItem(slot + 1, ItemStack.EMPTY);
                     setChanged();
                 }
                 return result;

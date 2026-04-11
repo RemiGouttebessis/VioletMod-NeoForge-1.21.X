@@ -16,9 +16,11 @@ import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.item.crafting.SingleRecipeInput;
 import net.minecraft.world.level.Level;
 
+import java.util.List;
+
 public record VioletExtractorRecipe(
         Ingredient ingredient,
-        ItemStack result,
+        List<ItemStack> results,
         int energyCost,
         int duration
 ) implements Recipe<SingleRecipeInput> {
@@ -26,7 +28,7 @@ public record VioletExtractorRecipe(
     public static final MapCodec<VioletExtractorRecipe> CODEC = RecordCodecBuilder.mapCodec(instance ->
             instance.group(
                     Ingredient.CODEC_NONEMPTY.fieldOf("ingredient").forGetter(VioletExtractorRecipe::ingredient),
-                    ItemStack.STRICT_CODEC.fieldOf("result").forGetter(VioletExtractorRecipe::result),
+                    ItemStack.STRICT_CODEC.listOf().fieldOf("results").forGetter(VioletExtractorRecipe::results),
                     Codec.INT.fieldOf("energy_cost").forGetter(VioletExtractorRecipe::energyCost),
                     Codec.INT.optionalFieldOf("duration", 120).forGetter(VioletExtractorRecipe::duration)
             ).apply(instance, VioletExtractorRecipe::new)
@@ -35,7 +37,7 @@ public record VioletExtractorRecipe(
     public static final StreamCodec<RegistryFriendlyByteBuf, VioletExtractorRecipe> STREAM_CODEC =
             StreamCodec.composite(
                     Ingredient.CONTENTS_STREAM_CODEC, VioletExtractorRecipe::ingredient,
-                    ItemStack.STREAM_CODEC, VioletExtractorRecipe::result,
+                    ItemStack.STREAM_CODEC.apply(ByteBufCodecs.list()), VioletExtractorRecipe::results,
                     ByteBufCodecs.INT, VioletExtractorRecipe::energyCost,
                     ByteBufCodecs.INT, VioletExtractorRecipe::duration,
                     VioletExtractorRecipe::new
@@ -48,7 +50,7 @@ public record VioletExtractorRecipe(
 
     @Override
     public ItemStack assemble(SingleRecipeInput input, HolderLookup.Provider provider) {
-        return result.copy();
+        return results.isEmpty() ? ItemStack.EMPTY : results.get(0).copy();
     }
 
     @Override
@@ -58,7 +60,7 @@ public record VioletExtractorRecipe(
 
     @Override
     public ItemStack getResultItem(HolderLookup.Provider provider) {
-        return result;
+        return results.isEmpty() ? ItemStack.EMPTY : results.get(0);
     }
 
     @Override

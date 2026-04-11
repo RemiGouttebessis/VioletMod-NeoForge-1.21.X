@@ -1,7 +1,10 @@
 {
   "type": "violetmod:violet_extracting",
   "ingredient": { "item": "minecraft:crying_obsidian" },
-  "result": { "id": "minecraft:amethyst_shard", "count": 4 },
+  "results": [
+    { "id": "minecraft:obsidian", "count": 1 },
+    { "id": "minecraft:redstone", "count": 1 }
+  ],
   "energy_cost": 1200,
   "duration": 160
 }
