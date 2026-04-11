@@ -1,5 +1,6 @@
 package com.imaire.violetmod.common.block;
 
+import com.imaire.violetmod.common.block.state.VioletExtractorVisualState;
 import com.imaire.violetmod.common.blockentity.VioletExtractorBlockEntity;
 import com.imaire.violetmod.registry.ModBlockEntities;
 import com.imaire.violetmod.registry.ModDataComponents;
@@ -18,14 +19,22 @@ import net.minecraft.world.level.block.entity.BlockEntityTicker;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
+import net.minecraft.world.level.block.state.properties.EnumProperty;
 import org.jetbrains.annotations.Nullable;
 
 public class VioletExtractorBlock extends BaseEntityBlock {
     public static final MapCodec<VioletExtractorBlock> CODEC = simpleCodec(VioletExtractorBlock::new);
 
+    public static final EnumProperty<VioletExtractorVisualState> VISUAL_STATE =
+            EnumProperty.create("visual_state", VioletExtractorVisualState.class);
+
     public VioletExtractorBlock(Properties properties) {
         super(properties);
-        this.registerDefaultState(this.stateDefinition.any().setValue(HorizontalDirectionalBlock.FACING, Direction.NORTH));
+        this.registerDefaultState(
+                this.stateDefinition.any()
+                        .setValue(HorizontalDirectionalBlock.FACING, Direction.NORTH)
+                        .setValue(VISUAL_STATE, VioletExtractorVisualState.POWERLESS)
+        );
     }
 
     @Override
@@ -35,12 +44,14 @@ public class VioletExtractorBlock extends BaseEntityBlock {
 
     @Override
     protected void createBlockStateDefinition(StateDefinition.Builder<net.minecraft.world.level.block.Block, BlockState> builder) {
-        builder.add(HorizontalDirectionalBlock.FACING);
+        builder.add(HorizontalDirectionalBlock.FACING, VISUAL_STATE);
     }
 
     @Override
     public @Nullable BlockState getStateForPlacement(BlockPlaceContext context) {
-        return this.defaultBlockState().setValue(HorizontalDirectionalBlock.FACING, context.getHorizontalDirection().getOpposite());
+        return this.defaultBlockState()
+                .setValue(HorizontalDirectionalBlock.FACING, context.getHorizontalDirection().getOpposite())
+                .setValue(VISUAL_STATE, VioletExtractorVisualState.POWERLESS);
     }
 
     @Override

@@ -1,8 +1,28 @@
 {
   "variants": {
-    "facing=north": { "model": "violetmod:block/violet_extractor_powerless" },
-    "facing=east":  { "model": "violetmod:block/violet_extractor_powerless", "y": 90 },
-    "facing=south": { "model": "violetmod:block/violet_extractor_powerless", "y": 180 },
-    "facing=west":  { "model": "violetmod:block/violet_extractor_powerless", "y": 270 }
+    "facing=north,visual_state=powerless": { "model": "violetmod:block/violet_extractor_powerless" },
+    "facing=east,visual_state=powerless":  { "model": "violetmod:block/violet_extractor_powerless", "y": 90 },
+    "facing=south,visual_state=powerless": { "model": "violetmod:block/violet_extractor_powerless", "y": 180 },
+    "facing=west,visual_state=powerless":  { "model": "violetmod:block/violet_extractor_powerless", "y": 270 },
+
+    "facing=north,visual_state=idle": { "model": "violetmod:block/violet_extractor_idle" },
+    "facing=east,visual_state=idle":  { "model": "violetmod:block/violet_extractor_idle", "y": 90 },
+    "facing=south,visual_state=idle": { "model": "violetmod:block/violet_extractor_idle", "y": 180 },
+    "facing=west,visual_state=idle":  { "model": "violetmod:block/violet_extractor_idle", "y": 270 },
+
+    "facing=north,visual_state=obsidian": { "model": "violetmod:block/violet_extractor_obsidian" },
+    "facing=east,visual_state=obsidian":  { "model": "violetmod:block/violet_extractor_obsidian", "y": 90 },
+    "facing=south,visual_state=obsidian": { "model": "violetmod:block/violet_extractor_obsidian", "y": 180 },
+    "facing=west,visual_state=obsidian":  { "model": "violetmod:block/violet_extractor_obsidian", "y": 270 },
+
+    "facing=north,visual_state=crying": { "model": "violetmod:block/violet_extractor_crying" },
+    "facing=east,visual_state=crying":  { "model": "violetmod:block/violet_extractor_crying", "y": 90 },
+    "facing=south,visual_state=crying": { "model": "violetmod:block/violet_extractor_crying", "y": 180 },
+    "facing=west,visual_state=crying":  { "model": "violetmod:block/violet_extractor_crying", "y": 270 },
+
+    "facing=north,visual_state=crying_running": { "model": "violetmod:block/violet_extractor_crying_running" },
+    "facing=east,visual_state=crying_running":  { "model": "violetmod:block/violet_extractor_crying_running", "y": 90 },
+    "facing=south,visual_state=crying_running": { "model": "violetmod:block/violet_extractor_crying_running", "y": 180 },
+    "facing=west,visual_state=crying_running":  { "model": "violetmod:block/violet_extractor_crying_running", "y": 270 }
   }
 }

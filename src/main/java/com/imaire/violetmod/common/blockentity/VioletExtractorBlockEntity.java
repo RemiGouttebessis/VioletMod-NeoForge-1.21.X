@@ -18,6 +18,28 @@ import org.jetbrains.annotations.Nullable;
 public class VioletExtractorBlockEntity extends BlockEntity {
     private int progress = 0;
     private boolean active = false;
+    private boolean cryingMode = false;
+    private boolean obsidianMode = false;
+
+    private static com.imaire.violetmod.common.block.state.VioletExtractorVisualState computeVisualState(VioletExtractorBlockEntity be, int energyPerTick) {
+        if (be.energyStorage.getEnergyStored() < energyPerTick) {
+            return com.imaire.violetmod.common.block.state.VioletExtractorVisualState.POWERLESS;
+        }
+
+        if (be.cryingMode && be.active) {
+            return com.imaire.violetmod.common.block.state.VioletExtractorVisualState.CRYING_RUNNING;
+        }
+
+        if (be.cryingMode) {
+            return com.imaire.violetmod.common.block.state.VioletExtractorVisualState.CRYING;
+        }
+
+        if (be.obsidianMode) {
+            return com.imaire.violetmod.common.block.state.VioletExtractorVisualState.OBSIDIAN;
+        }
+
+        return com.imaire.violetmod.common.block.state.VioletExtractorVisualState.IDLE;
+    }
 
     private final ModEnergyStorage energyStorage = new ModEnergyStorage(
             MachineConfig.VIOLET_EXTRACTOR.capacity(),
@@ -60,20 +82,41 @@ public class VioletExtractorBlockEntity extends BlockEntity {
         final int energyPerTick = MachineConfig.VIOLET_EXTRACTOR.energyPerTick();
         final int maxProgress = MachineConfig.VIOLET_EXTRACTOR.maxProgress();
 
-        if (be.energyStorage.getEnergyStored() >= energyPerTick) {
-            be.energyStorage.consumeInternal(energyPerTick, false);
-            be.progress++;
-            be.active = true;
+        // Exemple temporaire : choisis ici le mode pour tes tests
+        // Plus tard, ça viendra d'un slot, d'une recette, etc.
+        be.obsidianMode = false;
+        be.cryingMode = true;
 
-            if (be.progress >= maxProgress) {
-                be.progress = 0;
-                // future action: produire une ressource, transformer un bloc, etc.
+        if (be.energyStorage.getEnergyStored() >= energyPerTick) {
+            // Ici tu décides si la machine travaille vraiment
+            boolean shouldRun = be.cryingMode; // exemple
+
+            if (shouldRun) {
+                be.energyStorage.consumeInternal(energyPerTick, false);
+                be.progress++;
+                be.active = true;
+
+                if (be.progress >= maxProgress) {
+                    be.progress = 0;
+                }
+            } else {
+                be.active = false;
             }
 
             be.setChanged();
         } else {
             be.active = false;
             be.setChanged();
+        }
+
+        var newVisualState = computeVisualState(be, energyPerTick);
+
+        if (state.getValue(com.imaire.violetmod.common.block.VioletExtractorBlock.VISUAL_STATE) != newVisualState) {
+            level.setBlock(
+                    pos,
+                    state.setValue(com.imaire.violetmod.common.block.VioletExtractorBlock.VISUAL_STATE, newVisualState),
+                    3
+            );
         }
     }
 
