@@ -58,13 +58,20 @@ public class ModBlockStateProvider extends BlockStateProvider {
     }
 
     private void registerVioletExtractor() {
+        // Base model holds the geometry; thin override models set the texture per state.
+        ModelFile base = models().getExistingFile(modLoc("block/violet_extractor_base"));
+
         VariantBlockStateBuilder builder = getVariantBuilder(ModBlocks.VIOLET_EXTRACTOR.get());
 
         for (Direction dir : HorizontalDirectionalBlock.FACING.getPossibleValues()) {
             int yRot = dirToYRot(dir);
             for (VioletExtractorVisualState vs : VioletExtractorVisualState.values()) {
-                String modelName = "violet_extractor_" + vs.getSerializedName();
-                ModelFile model = models().getExistingFile(modLoc("block/" + modelName));
+                String textureName = "violetmod:block/violet_extractor_" + vs.getSerializedName();
+                String modelName   = "violet_extractor_" + vs.getSerializedName();
+
+                ModelFile model = models().withExistingParent(modelName, base.getLocation())
+                        .texture("texture", textureName);
+
                 builder.partialState()
                         .with(VioletExtractorBlock.VISUAL_STATE, vs)
                         .with(HorizontalDirectionalBlock.FACING, dir)

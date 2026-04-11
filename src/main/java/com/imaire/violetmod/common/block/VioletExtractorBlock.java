@@ -7,11 +7,16 @@ import com.imaire.violetmod.registry.ModDataComponents;
 import com.mojang.serialization.MapCodec;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.particles.DustParticleOptions;
+import net.minecraft.util.RandomSource;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.BaseEntityBlock;
+import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.level.block.HorizontalDirectionalBlock;
 import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -20,6 +25,7 @@ import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.EnumProperty;
+import org.joml.Vector3f;
 import org.jetbrains.annotations.Nullable;
 
 public class VioletExtractorBlock extends BaseEntityBlock {
@@ -73,6 +79,37 @@ public class VioletExtractorBlock extends BaseEntityBlock {
                 ModBlockEntities.VIOLET_EXTRACTOR_BE.get(),
                 VioletExtractorBlockEntity::serverTick
         );
+    }
+
+    @Override
+    protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos,
+                                               Player player, BlockHitResult hit) {
+        if (!level.isClientSide) {
+            if (level.getBlockEntity(pos) instanceof VioletExtractorBlockEntity be) {
+                player.openMenu(be);
+            }
+        }
+        return InteractionResult.sidedSuccess(level.isClientSide);
+    }
+
+    private static final DustParticleOptions VIOLET_DUST =
+            new DustParticleOptions(new Vector3f(0.55f, 0.0f, 1.0f), 1.2f);
+
+    @Override
+    public void animateTick(BlockState state, Level level, BlockPos pos, RandomSource random) {
+        VioletExtractorVisualState vs = state.getValue(VISUAL_STATE);
+        if (vs != VioletExtractorVisualState.CRYING_RUNNING && vs != VioletExtractorVisualState.OBSIDIAN) {
+            return;
+        }
+
+        int count = vs == VioletExtractorVisualState.CRYING_RUNNING ? 4 : 2;
+        for (int i = 0; i < count; i++) {
+            double x = pos.getX() + 0.15 + random.nextDouble() * 0.7;
+            double y = pos.getY() + 1.05 + random.nextDouble() * 0.15;
+            double z = pos.getZ() + 0.15 + random.nextDouble() * 0.7;
+            double vy = 0.04 + random.nextDouble() * 0.06;
+            level.addParticle(VIOLET_DUST, x, y, z, 0.0, vy, 0.0);
+        }
     }
 
     @Override

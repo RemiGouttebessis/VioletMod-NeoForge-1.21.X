@@ -21,6 +21,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - Use `TODO.md` for roadmap and planned features
 - Use `TASKS.md` for the current implementation target
 - Prefer small, incremental changes that preserve existing machine and registry patterns
+- put each change in `LOG.md` and at the end of your entire awnser to prompt write a small commit message in the log like `commit : <Message>`
 
 ## Architecture Overview
 

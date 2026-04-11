@@ -1,35 +1,6 @@
 {
-	"credit": "Made with Blockbench",
-	"texture_size": [64, 64],
-	"textures": {
-		"1": "violetmod:block/violet_extractor_powerless",
-		"particle": "violetmod:block/violet_extractor_powerless"
-	},
-	"elements": [
-		{
-			"name": "Basalt",
-			"from": [0, 0, 0],
-			"to": [16, 16, 16],
-			"faces": {
-				"north": { "uv": [0, 0, 4, 4], "texture": "#1" },
-				"east":  { "uv": [0, 4, 4, 8], "texture": "#1" },
-				"south": { "uv": [0, 4, 4, 8], "texture": "#1" },
-				"west":  { "uv": [0, 4, 4, 8], "texture": "#1" },
-				"up":    { "uv": [8, 4, 4, 0], "texture": "#1" },
-				"down":  { "uv": [8, 0, 4, 4], "texture": "#1" }
-			}
-		},
-		{
-			"from": [14, 14, 12],
-			"to": [2, 2, 0],
-			"faces": {
-				"north": { "uv": [7, 4, 10, 7], "texture": "#1" },
-				"east":  { "uv": [7, 7, 10, 10], "texture": "#1" },
-				"south": { "uv": [0, 8, 3, 11], "texture": "#1" },
-				"west":  { "uv": [7, 7, 10, 10], "texture": "#1" },
-				"up":    { "uv": [10, 10, 7, 7], "texture": "#1" },
-				"down":  { "uv": [10, 7, 7, 10], "texture": "#1" }
-			}
-		}
-	]
+  "parent": "violetmod:block/violet_extractor_base",
+  "textures": {
+    "texture": "violetmod:block/violet_extractor_powerless"
+  }
 }

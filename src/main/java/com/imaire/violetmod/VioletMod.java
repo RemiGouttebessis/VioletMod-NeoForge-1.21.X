@@ -1,5 +1,6 @@
 package com.imaire.violetmod;
 
+import com.imaire.violetmod.client.screen.VioletExtractorScreen;
 import com.imaire.violetmod.common.blockentity.BaseMachineBlockEntity;
 import com.imaire.violetmod.common.blockentity.VioletExtractorBlockEntity;
 import com.imaire.violetmod.config.ModConfigs;
@@ -11,6 +12,7 @@ import com.imaire.violetmod.registry.*;
 import com.mojang.logging.LogUtils;
 import net.minecraft.client.renderer.ItemBlockRenderTypes;
 import net.minecraft.client.renderer.RenderType;
+import net.neoforged.neoforge.client.event.RegisterMenuScreensEvent;
 import net.minecraft.data.DataGenerator;
 import net.minecraft.data.PackOutput;
 import net.neoforged.bus.api.IEventBus;
@@ -21,7 +23,6 @@ import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
 import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
 import net.neoforged.neoforge.data.event.GatherDataEvent;
-import net.neoforged.neoforge.items.wrapper.InvWrapper;
 import org.slf4j.Logger;
 
 @Mod(VioletMod.MOD_ID)
@@ -37,21 +38,25 @@ public class VioletMod {
         ModDataComponents.DATA_COMPONENTS.register(modEventBus);
         ModRecipes.RECIPE_SERIALIZERS.register(modEventBus);
         ModRecipes.RECIPE_TYPES.register(modEventBus);
+        ModMenuTypes.MENU_TYPES.register(modEventBus);
 
         modEventBus.addListener(this::registerCapabilities);
         modEventBus.addListener(this::onClientSetup);
+        modEventBus.addListener(this::registerScreens);
         modEventBus.addListener(this::gatherData);
 
         modContainer.registerConfig(ModConfig.Type.COMMON, ModConfigs.COMMON_SPEC);
     }
 
     private void onClientSetup(FMLClientSetupEvent event) {
-        event.enqueueWork(() -> {
-            ItemBlockRenderTypes.setRenderLayer(
-                    ModBlocks.VIOLET_EXTRACTOR.get(),
-                    RenderType.translucent()
-            );
-        });
+        event.enqueueWork(() -> ItemBlockRenderTypes.setRenderLayer(
+                ModBlocks.VIOLET_EXTRACTOR.get(),
+                RenderType.translucent()
+        ));
+    }
+
+    private void registerScreens(RegisterMenuScreensEvent event) {
+        event.register(ModMenuTypes.VIOLET_EXTRACTOR_MENU.get(), VioletExtractorScreen::new);
     }
 
     private void gatherData(GatherDataEvent event) {
@@ -78,11 +83,11 @@ public class VioletMod {
                 BaseMachineBlockEntity::getEnergyStorage
         );
 
-        // Item handler — only VioletExtractor has an inventory
+        // Item handler — sided: TOP=input, BOTTOM=output, others=null
         event.registerBlockEntity(
                 Capabilities.ItemHandler.BLOCK,
                 ModBlockEntities.VIOLET_EXTRACTOR_BE.get(),
-                (be, side) -> be.getInventory() != null ? new InvWrapper(be.getInventory()) : null
+                VioletExtractorBlockEntity::getItemHandler
         );
     }
 }
