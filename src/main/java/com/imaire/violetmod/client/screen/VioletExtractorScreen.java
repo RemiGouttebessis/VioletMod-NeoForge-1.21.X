@@ -1,135 +1,156 @@
 package com.imaire.violetmod.client.screen;
 
+import com.imaire.violetmod.VioletMod;
 import com.imaire.violetmod.common.menu.VioletExtractorMenu;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
 
 import java.util.List;
 
 public class VioletExtractorScreen extends AbstractContainerScreen<VioletExtractorMenu> {
 
-    // GUI dimensions
+    // ── Texture ──────────────────────────────────────────────────────────────
+    private static final ResourceLocation TEXTURE =
+            ResourceLocation.fromNamespaceAndPath(VioletMod.MOD_ID, "textures/gui/violet_extractor.png");
+    private static final int TEX = 256; // atlas size
+
+    // ── GUI dimensions ───────────────────────────────────────────────────────
     private static final int GUI_W = 176;
     private static final int GUI_H = 166;
 
-    // Energy bar (left side)
-    private static final int ENERGY_X = 8;
-    private static final int ENERGY_Y = 18;
-    private static final int ENERGY_W = 8;
-    private static final int ENERGY_H = 50;
+    // ── Energy bar ───────────────────────────────────────────────────────────
+    private static final int ENERGY_X = 7;
+    private static final int ENERGY_Y = 22;
+    private static final int ENERGY_W = 15;
+    private static final int ENERGY_H = 44;
 
-    // Progress bar (center arrow)
+    // ── Progress bar ─────────────────────────────────────────────────────────
     private static final int PROGRESS_X = 79;
-    private static final int PROGRESS_Y = 32;
+    private static final int PROGRESS_Y = 35;
     private static final int PROGRESS_W = 24;
     private static final int PROGRESS_H = 17;
 
-    // Colours
-    private static final int COL_BG_OUTER  = 0xFF3C3C3C;
-    private static final int COL_BG_INNER  = 0xFFC6C6C6;
-    private static final int COL_ENERGY_BG = 0xFF111111;
-    private static final int COL_ENERGY_FG = 0xFF22CC22;
-    private static final int COL_PROGRESS_BG = 0xFF888888;
-    private static final int COL_PROGRESS_FG = 0xFF8800FF;
-    private static final int COL_LABEL     = 0xFF404040;
-    private static final int COL_DIVIDER   = 0xFF999999;
+    // ── Dynamic fill colours (NOT in the texture, rendered procedurally) ─────
+    private static final int COL_E_HIGH = 0xFF33EE44;  // >= 60%  green
+    private static final int COL_E_MID  = 0xFFEEAA11;  // 25–59%  amber
+    private static final int COL_E_LOW  = 0xFFEE4444;  // <  25%  red
+    private static final int COL_P_FILL = 0xFF8800EE;  // violet progress
+    private static final int COL_LABEL  = 0xFFDDDDDD;  // bright label
 
+    // ── Constructor ──────────────────────────────────────────────────────────
     public VioletExtractorScreen(VioletExtractorMenu menu, Inventory playerInventory, Component title) {
         super(menu, playerInventory, title);
-        this.imageWidth  = GUI_W;
-        this.imageHeight = GUI_H;
+        this.imageWidth      = GUI_W;
+        this.imageHeight     = GUI_H;
+        this.titleLabelY     = 5;
+        this.inventoryLabelY = GUI_H - 94; // 72 — standard MC value
     }
 
-    @Override
-    public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
-        renderBackground(graphics, mouseX, mouseY, partialTick);
-        super.render(graphics, mouseX, mouseY, partialTick);
-        renderTooltip(graphics, mouseX, mouseY);
-    }
+    // ── Render ───────────────────────────────────────────────────────────────
 
     @Override
-    protected void renderBg(GuiGraphics graphics, float partialTick, int mouseX, int mouseY) {
+    public void render(GuiGraphics g, int mouseX, int mouseY, float partialTick) {
+        renderBackground(g, mouseX, mouseY, partialTick);
+        super.render(g, mouseX, mouseY, partialTick);
+        renderTooltip(g, mouseX, mouseY);
+    }
+
+    /**
+     * Renders the static GUI texture, then overlays the dynamic fills
+     * for the energy bar and progress bar.
+     */
+    @Override
+    protected void renderBg(GuiGraphics g, float partialTick, int mouseX, int mouseY) {
         int x = leftPos;
         int y = topPos;
 
-        // ── Outer border ───────────────────────────────────────────────────
-        graphics.fill(x, y, x + GUI_W, y + GUI_H, COL_BG_OUTER);
-        graphics.fill(x + 1, y + 1, x + GUI_W - 1, y + GUI_H - 1, COL_BG_INNER);
+        // ── Static background (PNG blit) ──────────────────────────────────────
+        // This covers: panel, bevel, machine/inventory areas, divider, hotbar separator,
+        // all 36 inventory slot backgrounds + 3 machine slot backgrounds,
+        // energy bar frame, progress bar frame, and arrow tip.
+        g.blit(TEXTURE, x, y, 0, 0, GUI_W, GUI_H, TEX, TEX);
 
-        // ── Divider between machine area and player inventory ──────────────
-        graphics.fill(x + 7, y + 76, x + GUI_W - 7, y + 77, COL_DIVIDER);
-
-        // ── Energy bar ────────────────────────────────────────────────────
-        // Border
-        graphics.fill(x + ENERGY_X - 1, y + ENERGY_Y - 1,
-                      x + ENERGY_X + ENERGY_W + 1, y + ENERGY_Y + ENERGY_H + 1,
-                      COL_BG_OUTER);
-        // Background
-        graphics.fill(x + ENERGY_X, y + ENERGY_Y,
-                      x + ENERGY_X + ENERGY_W, y + ENERGY_Y + ENERGY_H,
-                      COL_ENERGY_BG);
-        // Fill (grows upward)
+        // ── Energy fill (dynamic, grows upward) ───────────────────────────────
         int maxE = menu.getMaxEnergy();
         if (maxE > 0) {
             int fillH = (int) ((float) menu.getEnergy() / maxE * ENERGY_H);
             if (fillH > 0) {
-                graphics.fill(x + ENERGY_X,
-                              y + ENERGY_Y + ENERGY_H - fillH,
-                              x + ENERGY_X + ENERGY_W,
-                              y + ENERGY_Y + ENERGY_H,
-                              COL_ENERGY_FG);
+                int pct = menu.getEnergy() * 100 / maxE;
+                int col = pct < 25 ? COL_E_LOW : (pct < 60 ? COL_E_MID : COL_E_HIGH);
+                g.fill(x + ENERGY_X,
+                        y + ENERGY_Y + ENERGY_H - fillH,
+                        x + ENERGY_X + ENERGY_W - 1,
+                        y + ENERGY_Y + ENERGY_H - 1,
+                        col);
             }
         }
 
-        // ── Progress bar (horizontal arrow) ──────────────────────────────
-        // Border
-        graphics.fill(x + PROGRESS_X - 1, y + PROGRESS_Y - 1,
-                      x + PROGRESS_X + PROGRESS_W + 1, y + PROGRESS_Y + PROGRESS_H + 1,
-                      COL_BG_OUTER);
-        // Background
-        graphics.fill(x + PROGRESS_X, y + PROGRESS_Y,
-                      x + PROGRESS_X + PROGRESS_W, y + PROGRESS_Y + PROGRESS_H,
-                      COL_PROGRESS_BG);
-        // Fill (grows right)
+        // ── Progress fill (dynamic, grows right) ─────────────────────────────
         int maxP = menu.getMaxProgress();
         if (maxP > 0) {
             int fillW = (int) ((float) menu.getProgress() / maxP * PROGRESS_W);
             if (fillW > 0) {
-                graphics.fill(x + PROGRESS_X,
-                              y + PROGRESS_Y,
-                              x + PROGRESS_X + fillW,
-                              y + PROGRESS_Y + PROGRESS_H,
-                              COL_PROGRESS_FG);
+                g.fill(x + PROGRESS_X,
+                        y + PROGRESS_Y,
+                        x + PROGRESS_X + fillW,
+                        y + PROGRESS_Y + PROGRESS_H - 1,
+                        COL_P_FILL);
             }
         }
     }
 
+    // ── Labels ───────────────────────────────────────────────────────────────
+
     @Override
-    protected void renderLabels(GuiGraphics graphics, int mouseX, int mouseY) {
-        // Machine title (centered)
-        int titleW = this.font.width(this.title);
-        graphics.drawString(this.font, this.title,
-                (GUI_W - titleW) / 2, this.titleLabelY, COL_LABEL, false);
+    protected void renderLabels(GuiGraphics g, int mouseX, int mouseY) {
+        // Machine title — centred
+        int tw = this.font.width(this.title);
+        g.drawString(this.font, this.title, (GUI_W - tw) / 2, this.titleLabelY, COL_LABEL, false);
+
         // Player inventory label
-        graphics.drawString(this.font, this.playerInventoryTitle,
-                8, this.imageHeight - 94, COL_LABEL, false);
+        g.drawString(this.font, this.playerInventoryTitle, 8, this.inventoryLabelY, COL_LABEL, false);
+        }
+
+    /** Format large FE numbers compactly: 20000 → "20k", 1500000 → "1.5M". */
+    private static String formatFE(int fe) {
+        if (fe >= 1_000_000) return String.format("%.1fM", fe / 1_000_000.0);
+        if (fe >= 1_000)     return (fe / 1_000) + "k";
+        return String.valueOf(fe);
     }
 
-    @Override
-    protected void renderTooltip(GuiGraphics graphics, int mouseX, int mouseY) {
-        super.renderTooltip(graphics, mouseX, mouseY);
+    // ── Tooltips ─────────────────────────────────────────────────────────────
 
-        // Tooltip on energy bar
+    @Override
+    protected void renderTooltip(GuiGraphics g, int mouseX, int mouseY) {
+        super.renderTooltip(g, mouseX, mouseY);
+
+        // Energy bar
         int ex = leftPos + ENERGY_X;
-        int ey = topPos + ENERGY_Y;
+        int ey = topPos  + ENERGY_Y;
         if (mouseX >= ex && mouseX < ex + ENERGY_W && mouseY >= ey && mouseY < ey + ENERGY_H) {
-            graphics.renderTooltip(this.font,
-                    List.of(Component.literal(menu.getEnergy() + " / " + menu.getMaxEnergy() + " FE")),
-                    java.util.Optional.empty(),
-                    mouseX, mouseY);
+            int e    = menu.getEnergy();
+            int maxE = menu.getMaxEnergy();
+            g.renderTooltip(this.font, List.of(
+                    Component.translatable("tooltip.violetmod.energy"),
+                    Component.literal(formatFE(e) + " / " + formatFE(maxE) + " FE")
+            ), java.util.Optional.empty(), mouseX, mouseY);
+        }
+
+        // Progress bar
+        int px = leftPos + PROGRESS_X;
+        int py = topPos  + PROGRESS_Y;
+        if (mouseX >= px && mouseX < px + PROGRESS_W && mouseY >= py && mouseY < py + PROGRESS_H) {
+            int prog = menu.getProgress();
+            int maxP = menu.getMaxProgress();
+            if (maxP > 0) {
+                g.renderTooltip(this.font, List.of(
+                        Component.translatable("tooltip.violetmod.progress"),
+                        Component.literal(+ prog * 100 / maxP + "%")
+                ), java.util.Optional.empty(), mouseX, mouseY);
+            }
         }
     }
-
 }

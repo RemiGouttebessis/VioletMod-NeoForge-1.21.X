@@ -9,6 +9,7 @@ import com.imaire.violetmod.registry.ModBlockEntities;
 import com.imaire.violetmod.registry.ModRecipes;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.world.level.block.HorizontalDirectionalBlock;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
@@ -98,18 +99,24 @@ public class VioletExtractorBlockEntity extends BaseMachineBlockEntity implement
 
     // ── Sided capabilities ───────────────────────────────────────────────────
 
-    /** Energy: accepted from all four horizontal sides (and null for direct access). */
+    /**
+     * Energy side rule — relative to the machine's orientation.
+     *
+     * The model's NORTH face (unrotated) is the machine's front face.
+     * After Y-rotation, the model's NORTH maps to the world direction equal to FACING.
+     * Therefore: the front face (== FACING) is always blocked.
+     * TOP and BOTTOM are also blocked.
+     * The three remaining horizontal faces (left, right, back) accept energy.
+     *
+     * null is allowed for direction-agnostic access (display, internal).
+     */
     @Override
     @Nullable
     public net.neoforged.neoforge.energy.EnergyStorage getEnergyStorage(@Nullable Direction side) {
-        if (side == null
-                || side == Direction.NORTH
-                || side == Direction.EAST
-                || side == Direction.WEST
-                || side == Direction.SOUTH) {
-            return energyStorage;
-        }
-        return null;
+        if (side == null) return energyStorage;
+        if (side == Direction.UP || side == Direction.DOWN) return null;
+        Direction front = getBlockState().getValue(HorizontalDirectionalBlock.FACING);
+        return side == front ? null : energyStorage;
     }
 
     /** Items: TOP inserts input, BOTTOM extracts output, other sides return null. */

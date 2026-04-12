@@ -5,6 +5,7 @@
   "itemGroup.violetmod": "Violet Mod",
 
   "tooltip.violetmod.energy": "Énergie",
+  "tooltip.violetmod.progress": "Progression",
 
   "config.violetmod.logical_computer.capacity": "Capacité de l'ordinateur logique",
   "config.violetmod.logical_computer.max_receive": "Réception max de l'ordinateur logique",

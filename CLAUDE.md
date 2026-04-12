@@ -23,6 +23,12 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - Prefer small, incremental changes that preserve existing machine and registry patterns
 - put each change in `LOG.md` and at the end of your entire awnser to prompt write a small commit message in the log like `commit : <Message>`
 
+## Inspiration
+
+- VioletMod is tech mod like mekanism or applied energistics 2
+- Mekanism : https://github.com/mekanism/Mekanism/tree/1.21.x
+- AE2 : https://github.com/AppliedEnergistics/Applied-Energistics-2
+
 ## Architecture Overview
 
 A NeoForge energy-based technology mod (v0.0.1, early development). Two machines currently implemented: `LogicalComputer` and `VioletExtractor`.
